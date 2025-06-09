@@ -1,0 +1,93 @@
+import random
+import os
+import time
+import sys
+
+# Game settings
+WIDTH = 20
+HEIGHT = 10
+
+# Initialize snake and food
+snake = [(5, 5)]
+direction = "RIGHT"
+food = (random.randint(1, WIDTH - 2), random.randint(1, HEIGHT - 2))
+score = 0
+
+def print_board():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            if (x == 0 or x == WIDTH-1 or y == 0 or y == HEIGHT-1):
+                print("#", end="")
+            elif (x, y) == snake[0]:
+                print("O", end="")  # Head
+            elif (x, y) in snake:
+                print("o", end="")  # Body
+            elif (x, y) == food:
+                print("*", end="")  # Food
+            else:
+                print(" ", end="")
+        print()
+    print("Score:", score)
+
+def move_snake():
+    global food, score
+    head_x, head_y = snake[0]
+
+    if direction == "UP":
+        head_y -= 1
+    elif direction == "DOWN":
+        head_y += 1
+    elif direction == "LEFT":
+        head_x -= 1
+    elif direction == "RIGHT":
+        head_x += 1
+
+    new_head = (head_x, head_y)
+
+    if (new_head in snake or head_x == 0 or head_x == WIDTH-1 or head_y == 0 or head_y == HEIGHT-1):
+        print_board()
+        print("Game Over! Final Score:", score)
+        sys.exit()
+
+    snake.insert(0, new_head)
+
+    if new_head == food:
+        score += 1
+        food = (random.randint(1, WIDTH - 2), random.randint(1, HEIGHT - 2))
+    else:
+        snake.pop()
+
+def get_input():
+    import msvcrt  # Windows-only
+    if msvcrt.kbhit():
+        key = msvcrt.getch().decode("utf-8").lower()
+        return key
+    return None
+
+# Main loop
+try:
+    while True:
+        print_board()
+        time.sleep(0.2)
+        
+        # Input Handling (Windows only with msvcrt)
+        if os.name == 'nt':
+            key = get_input()
+            if key == 'w' and direction != "DOWN":
+                direction = "UP"
+            elif key == 's' and direction != "UP":
+                direction = "DOWN"
+            elif key == 'a' and direction != "RIGHT":
+                direction = "LEFT"
+            elif key == 'd' and direction != "LEFT":
+                direction = "RIGHT"
+        else:
+            print("⚠️ Live input only works on Windows terminal with this version.")
+            print("Use 'Replit' or ask for a 'turn-based version' using input().")
+            break
+
+        move_snake()
+
+except KeyboardInterrupt:
+    print("\nGame interrupted.")
